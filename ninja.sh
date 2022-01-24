@@ -1,6 +1,6 @@
 #!/bin/bash
 CLANG_BUILD_DIR="/tmp/clang-build"
-CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang"
+CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang;clang-tools-extra"
 CMAKE_INSTALL_TARGETS="install-clang install-clang-resource-headers install-clang-format"
 CLANG_INSTALL_DIR="/tmp/clang-install"
 
@@ -19,9 +19,8 @@ cmake -GNinja \
 
 ninja $CMAKE_INSTALL_TARGETS
 
-popd
+cmake --build "$CLANG_BUILD_DIR/build" --target clangd
 
-# Cleanup.
-# rm -rf "$CLANG_BUILD_DIR/build"
+popd
 
 echo "Done"

@@ -51,10 +51,20 @@ COPY ninja.sh /ninja.sh
 RUN /ninja.sh
 
 # Stage 2. Produce a minimal release image with build results.
-# FROM debian:11
-# # # Install packages for minimal useful image.
-# RUN apt update && \
-#   apt install -y --no-install-recommends libstdc++6 binutils && \
-#   rm -rf /var/lib/apt/lists/*
-# # # Copy build results of stage 1 to /usr/local.
-# COPY --from=builder /tmp/clang-install/ /usr/local/
+FROM debian:11
+# Install packages for minimal useful image.
+RUN apt update && \
+  apt install -y --no-install-recommends libstdc++6 binutils && \
+  rm -rf /var/lib/apt/lists/*
+# Copy build results of stage 1 to /usr/local.
+COPY --from=builder /tmp/clang-install/ /usr/local/
+
+COPY --from=builder /tmp/clang-build/build/clang-format /usr/local/bin
+COPY --from=builder /tmp/clang-build/build/clangd /usr/local/bin
+
+# COPY --from=builder /tmp/clang-build/build/clang-tblgen /usr/local/bin
+# COPY --from=builder /tmp/clang-build/build/clang-ast-dump /usr/local/bin
+# COPY --from=builder /tmp/clang-build/build/clang-offload-bundler /usr/local/bin
+# COPY --from=builder /tmp/clang-build/build/clang-offload-wrapper /usr/local/bin
+# COPY --from=builder /tmp/clang-build/build/llvm-lit /usr/local/bin
+# COPY --from=builder /tmp/clang-build/build/llvm-tblgen /usr/local/bin
