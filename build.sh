@@ -1,5 +1,5 @@
 set -e
 
 tag=$(date '+%s')
-# docker build -t clang:${tag} --progress=plain .
-docker build -t clang:${tag} .
+DOCKER_BUILDKIT=1 docker buildx build -t clang:${tag} .
+echo "docker run -it clang:$tag bash"
