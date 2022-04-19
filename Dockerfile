@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.3
+
 #===- llvm/utils/docker/debian8/build/Dockerfile -------------------------===//
 #
 # Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -16,20 +18,26 @@ RUN grep deb /etc/apt/sources.list | \
 
 # Install compiler, python
 RUN apt update && \
-  apt install -y --no-install-recommends ca-certificates gnupg build-essential python3.9 wget git unzip gcc && \
-  apt install -y lsb-release software-properties-common && \
-  bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && \
-  apt install -y clangd-13 && \
+  apt install -y --no-install-recommends ca-certificates gnupg build-essential python3.9 unzip wget gcc vim \
+  git clang cmake libstdc++-10-dev libssl-dev libxxhash-dev zlib1g-dev pkg-config && \
   rm -rf /var/lib/apt/lists/*
+
+RUN cd /tmp && \
+  git clone https://github.com/rui314/mold.git && \
+  cd mold && \
+  git checkout v1.1.1 && \
+  make -j$(nproc) CXX=clang++ && \
+  make install
 
 RUN ln -s /usr/bin/python3 /usr/bin/python & \
   ln -s /usr/bin/pip3 /usr/bin/pip
 
 # Install a newer ninja release. It seems the older version in the debian repos
 # randomly crashes when compiling llvm.
-RUN wget "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-linux.zip" && \
-  unzip ninja-linux.zip -d /usr/local/bin && \
-  rm ninja-linux.zip
+RUN \
+  wget --no-verbose "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-linux.zip" -O "/tmp/ninja-linux.zip" && \
+  wget --no-verbose "https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1-linux-x86_64.tar.gz" -O "/tmp/cmake.tar.gz" && \
+  wget --no-verbose "https://codeload.github.com/llvm/llvm-project/tar.gz/refs/tags/llvmorg-13.0.0" -O "/tmp/llvmorg.tar.gz"
 
 RUN mkdir /tmp/cmake-install && \
   cd /tmp/cmake-install && \
